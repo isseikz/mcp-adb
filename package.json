@@ -1,0 +1,33 @@
+{
+  "name": "mcp-adb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "mcp-adb": "./src/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && chmod 755 build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "child_process": "^1.0.2",
+    "fs-extra": "^11.3.0",
+    "open": "^10.1.0",
+    "path": "^0.12.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.14.0",
+    "typescript": "^5.8.3"
+  }
+}
