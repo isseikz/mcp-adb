@@ -98,7 +98,8 @@ async function main() {
                         content: [
                             {
                                 type: "text",
-                                text: `✅ Screenshot captured successfully from Android device!\n\n- Image data: included in this response as base64 encoded string: ${base64Image}\n\n- File path: ${tempFilePath}\n- Device ID: ${deviceId || 'N/A'}`
+                                description: "Base64 encoded screenshot",
+                                text: base64Image
                             }
                         ]
                     };
