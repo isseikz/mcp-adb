@@ -54,33 +54,11 @@ async function main() {
             version: "1.0.0"
         });
 
-        // Register a resource for screenshots
-        server.resource(
-            "Latest Screenshot",
-            "adb://screenshots/latest",
-            async () => {
-                if (latestScreenshotPath && fs.existsSync(latestScreenshotPath)) {
-                    const imageBuffer = await fs.readFile(latestScreenshotPath);
-                    return {
-                        contents: [
-                            {
-                                uri: "adb://screenshots/latest",
-                                blob: imageBuffer.toString('base64'),
-                                mimeType: "image/png"
-                            }
-                        ]
-                    };
-                }
-                throw new Error("Screenshot hasn't been taken yet");
-            }
-        );
-
         // Add screenshot tool with proper parameter schema
         server.tool(
             "screenshot",
             {
                 deviceId: z.string().optional(),
-                openInBrowser: z.boolean().optional().default(false)
             },
             async (args, extra) => {
                 try {
@@ -91,14 +69,13 @@ async function main() {
 
                     // Get deviceId from parameters
                     const deviceId = args.deviceId;
-                    const openInBrowser = args.openInBrowser;
 
                     // Build the ADB command
                     let adbCommand = 'adb';
                     if (deviceId) {
                         adbCommand += ` -s ${deviceId}`;
                     }
-                    adbCommand += ` exec-out screencap -p > ${tempFilePath}`;
+                    adbCommand += ` exec-out screencap -p > ${tempFilePath} && sips -Z 640 ${tempFilePath}`;
 
                     // Execute the ADB command and directly capture the output
                     console.log(`Executing: ${adbCommand}`);
@@ -112,27 +89,16 @@ async function main() {
                     // Update the latest screenshot path
                     latestScreenshotPath = tempFilePath;
 
-                    // If requested, open the screenshot in the browser (using dynamic import)
-                    if (openInBrowser) {
-                        // Use dynamic import instead of static import
-                        const openModule = await import('open');
-                        await openModule.default(tempFilePath);
-                    }
+                    // Read the image file as base64
+                    const imageBuffer = await fs.readFile(tempFilePath);
+                    const base64Image = imageBuffer.toString('base64');
 
                     // Return a reference to the image resource
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: `Screenshot captured successfully!\n\nYou can access this screenshot through the resource URI: adb://screenshots/latest\n\nScreenshot saved as: ${screenshotFilename}`
-                            },
-                            {
-                                type: "resource",
-                                resource: {
-                                    uri: "adb://screenshots/latest",
-                                    mimeType: "image/png",
-                                    text: "Latest Screenshot"
-                                }
+                                text: `✅ Screenshot captured successfully from Android device!\n\n- Image data: included in this response as base64 encoded string: ${base64Image}\n\n- File path: ${tempFilePath}\n- Device ID: ${deviceId || 'N/A'}`
                             }
                         ]
                     };

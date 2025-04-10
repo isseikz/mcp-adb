@@ -5,6 +5,7 @@ A Model Context Protocol (MCP) server that provides integration with Android Deb
 ## Features
 
 - **Screenshot Capture**: Take screenshots of connected Android devices
+- **Base64 Image Data**: Receive screenshot data directly as base64-encoded strings
 - **Key Event Control**: Send key events to Android devices (navigation, back, home)
 - **Multiple Device Support**: Target specific devices when multiple devices are connected
 - **Resource Access**: Access the latest screenshot through a resource URI
@@ -53,6 +54,12 @@ Parameters:
 
 - `deviceId` (optional): Target a specific device when multiple devices are connected
 - `openInBrowser` (optional, default: false): Automatically open the screenshot in your default browser
+
+Response:
+
+- Text description of the screenshot capture
+- Resource URI reference to the latest screenshot
+- Base64-encoded image data for direct use without making a separate resource request
 
 Example:
 
