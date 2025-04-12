@@ -1,19 +1,22 @@
+[日本語](README.ja.md)
+
 # MCP-ADB
 
 A Model Context Protocol (MCP) server that provides integration with Android Debug Bridge (ADB) for AI assistants to interact with Android devices.
 
 ## Features
 
-- **Screenshot Capture**: Take screenshots of connected Android devices
+- **Screenshot Capture**: Take screenshots of connected Android devices with automatic resizing
 - **Base64 Image Data**: Receive screenshot data directly as base64-encoded strings
 - **Key Event Control**: Send key events to Android devices (navigation, back, home)
 - **Multiple Device Support**: Target specific devices when multiple devices are connected
-- **Resource Access**: Access the latest screenshot through a resource URI
+- **Device Listing**: List all connected Android devices as resources
+- **Resource Access**: Access screenshots and device information via resource URIs
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) (v16 or higher recommended)
-- [Android Debug Bridge (ADB)](https://developer.android.com/studio/command-line/adb) installed and available in PATH
+- [Android Debug Bridge (ADB)](https://developer.android.com/studio/command-line/adb) installed and available in PATH or configured via ADB_PATH environment variable
 - Connected Android device(s) with USB debugging enabled
 
 ## Installation
@@ -32,43 +35,60 @@ npm run build
 
 ## Usage
 
-### Start the MCP Server
+### Using with Claude Desktop
 
-```bash
-node build/index.js
-```
+To use this MCP server with Claude Desktop add mcp-adb into claude_desktop_config.json, which can be found in the Claude Desktop installation directory or Claude - Settings - Developer - Edit Config
 
-Or if installed globally:
+Here is an example of how to configure the `claude_desktop_config.json` file:
 
-```bash
-mcp-adb
-```
+````json
+{
+  "mcpServers": {
+    "mcp-adb": {
+      "command": "node",
+      "args": ["/path/to/mcp-adb/build/index.js"],
+      "env": {
+        "ADB_PATH": "/path/to/adb"
+      }
+    }
+  }
+}
+
+```json
+{
+  "mcpServers": {
+    "mcp-adb": {
+      "command": "node",
+      "args": ["/path/to/mcp-adb/build/index.js"],
+      "env": {
+        "ADB_PATH": "/path/to/adb"
+      }
+    }
+  }
+}
+````
 
 ### Available Tools
 
 #### Screenshot Tool
 
-Captures a screenshot from a connected Android device.
+Captures a screenshot from a connected Android device and automatically resizes it to 640px width.
 
 Parameters:
 
 - `deviceId` (optional): Target a specific device when multiple devices are connected
-- `openInBrowser` (optional, default: false): Automatically open the screenshot in your default browser
 
 Response:
 
-- Text description of the screenshot capture
-- Resource URI reference to the latest screenshot
-- Base64-encoded image data for direct use without making a separate resource request
+- Base64-encoded image data (PNG format) directly in the response
 
 Example:
 
 ```json
 {
-  "tool": "screenshot",
-  "parameters": {
-    "deviceId": "emulator-5554",
-    "openInBrowser": true
+  "name": "screenshot",
+  "arguments": {
+    "deviceId": "emulator-5554"
   }
 }
 ```
@@ -100,8 +120,8 @@ Example:
 
 ```json
 {
-  "tool": "pressKey",
-  "parameters": {
+  "name": "pressKey",
+  "arguments": {
     "keycode": "KEYCODE_DPAD_DOWN",
     "deviceId": "emulator-5554"
   }
@@ -110,12 +130,30 @@ Example:
 
 ### Resources
 
-#### Latest Screenshot
+#### Connected Devices
 
-Access the most recently captured screenshot through the resource URI:
+List all connected Android devices:
 
 ```
-adb://screenshots/latest
+adb://devices
+```
+
+Response:
+
+- A list of connected device IDs
+
+#### Screenshots
+
+Access a specific screenshot by filename:
+
+```
+adb://screenshots/{filename}
+```
+
+For example:
+
+```
+adb://screenshots/screenshot-2025-04-10T16-30-48-931Z.png
 ```
 
 ## Development
@@ -146,8 +184,7 @@ This project uses the following dependencies:
 
 - `@modelcontextprotocol/sdk`: MCP server implementation
 - `fs-extra`: Enhanced file system methods
-- `zod`: Schema validation for tool parameters
-- `open`: For opening files in the default application
+- `sips`: Used for image resizing (built into macOS) to reduce context comsumption
 
 ## License
 
