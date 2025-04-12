@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mcp-adb": {
+      "command": "node",
+      "args": ["/path/to/mcp-adb/build/index.js"],
+      "env": {
+        "ADB_PATH": "/path/to/adb"
+      }
+    }
+  }
+}
